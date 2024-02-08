@@ -8,6 +8,8 @@ import androidx.core.app.ActivityCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import android.Manifest
 import com.example.totalrecall.databinding.ActivityMainBinding
+import com.google.android.material.tabs.TabLayout
+import com.google.android.material.tabs.TabLayoutMediator
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
@@ -20,9 +22,14 @@ class MainActivity : AppCompatActivity() {
         if (ActivityCompat.checkSelfPermission(this@MainActivity, Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this@MainActivity, arrayOf(Manifest.permission.READ_CONTACTS), REQUEST_PERMISSION)
         }else {
-            getContacts()
+            val fragments = listOf(
+                ContactsFragment(getContacts()),
+                ToDoFragment()
+            )
+            binding.pager.adapter = FragmentAdapter(this@MainActivity, fragments)
+            TabLayoutMediator(binding.tabs, binding.pager) { tab, position -> if(position == 0) tab.setIcon(R.drawable.baseline_contacts_24) else tab.setIcon(R.drawable.baseline_summarize_24)}.attach()
         }
-        binding.contacts.layoutManager = LinearLayoutManager(this@MainActivity, LinearLayoutManager.VERTICAL, false)
+
     }
 
     override fun onRequestPermissionsResult(
@@ -36,8 +43,9 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun getContacts() {
-        binding.contacts.adapter = ContactsAdapter(getContactsData())
+    private fun getContacts(): ArrayList<Contact> {
+        val contactList = getContactsData()
+        return contactList
     }
 
     private fun getContactsData(): ArrayList<Contact> {
